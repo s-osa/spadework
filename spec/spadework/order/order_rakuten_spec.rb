@@ -8,6 +8,15 @@ describe Order::Rakuten do
     @order = Order::Rakuten.new(arr)
   end
 
+  describe "#order_datetime" do
+    it "should return DateTime." do
+      @order[2], @order[3] = "2012/10/30", "13:48:41"
+      @order.order_datetime.should == DateTime.new(2012, 10, 30, 13, 48, 41)
+      @order[2], @order[3] = "2012/11/01", "13:48:41"
+      @order.order_datetime.should == DateTime.new(2012, 11, 1, 13, 48, 41)
+    end
+  end
+
   describe "#preorder?" do
     it "should be true when including date in item name." do
       @order[4] = "【大型】【11月13日発送予定】600L冷蔵庫"
@@ -20,7 +29,7 @@ describe Order::Rakuten do
     end
   end
 
-  describe "wish_date?" do
+  describe "#wish_date?" do
     it "should be true when including a wish date and time." do 
       @order[45] = <<EOS
 [配送日時指定:]
@@ -89,19 +98,42 @@ EOS
   end
 
   describe "#shippable_date" do
-    it "should return Date when including date in this year at item name." do
+    it "should return Date when including this year date at item name." do
+      @order[2], @order[3] = "2012/10/30", "13:48:41"
       @order[4] = "【大型】【12月31日発送予定】600L冷蔵庫"
       @order.shippable_date.should == Date.new(Date.today.year, 12, 31)
     end
 
-    it "should return Date when including date in next year at item name." do
+    it "should return Date when including next year date at item name." do
+      @order[2], @order[3] = "2012/10/30", "13:48:41"
       @order[4] = "【大型】【1月01日発送予定】600L冷蔵庫"
       @order.shippable_date.should == Date.new(Date.today.year + 1, 1, 1)
     end
 
-    it "should return nil when not including date in item name." do
+    it "should return today when including no date in item name and ordered before 13:30." do
+      @order[2], @order[3] = Time.now.strftime("%Y/%m/%d"), "12:48:41"
       @order[4] = "【大型】600L冷蔵庫"
-      @order.shippable_date.should == nil
+      @order.shippable_date.should == Date.today
+    end
+
+    it "should return tomorrow when including no date in item name and ordered after 15:30." do
+      @order[2], @order[3] = Time.now.strftime("%Y/%m/%d"), "15:48:41"
+      @order[4] = "【大型】600L冷蔵庫"
+      @order.shippable_date.should == Date.today + 1
+    end
+
+    it "should return today when including no date in item name and ordered between 13:30 to 15:30 on weekday." do
+      pending("Today is holiday.") if Date4.parse(Time.now.to_s).national_holiday?
+      @order[2], @order[3] = Time.now.strftime("%Y/%m/%d"), "14:48:41"
+      @order[4] = "【大型】600L冷蔵庫"
+      @order.shippable_date.should == Date.today
+    end
+
+    it "should return today when including no date in item name and ordered between 13:30 to 15:30 on holiday." do
+      pending("Today is weekday.") unless Date4.parse(Time.now.to_s).national_holiday?
+      @order[2], @order[3] = Time.now.strftime("%Y/%m/%d"), "14:48:41"
+      @order[4] = "【大型】600L冷蔵庫"
+      @order.shippable_date.should == Date.today + 1
     end
   end
 
@@ -111,7 +143,7 @@ EOS
       @order.ship_days.should == 1
     end
 
-    it "should be 1 when Hokkaido." do
+    it "should be 2 when Hokkaido." do
       @order[30] = "北海道"
       @order.ship_days.should == 2
     end

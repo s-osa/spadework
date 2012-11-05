@@ -1,5 +1,9 @@
 # coding: utf-8
 
+require 'date'
+require 'date4'
+require 'date4/holiday'
+
 class Order::Base < Array
   Version = 0.1
   ShipDaysTo = {
@@ -15,3 +19,4 @@ class Order::Base < Array
 沖縄県: 2
   }
 end
+
