@@ -1,1 +1,0 @@
-osa@osa-ThinkPad-X60s.11650:1351985145

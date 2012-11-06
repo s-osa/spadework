@@ -123,14 +123,14 @@ EOS
     end
 
     it "should return today when including no date in item name and ordered between 13:30 to 15:30 on weekday." do
-      pending("Today is holiday.") if Date4.parse(Time.now.to_s).national_holiday?
+      Time.stub(:now).and_return(Time.new(2012,11,5,14,30))
       @order[2], @order[3] = Time.now.strftime("%Y/%m/%d"), "14:48:41"
       @order[4] = "【大型】600L冷蔵庫"
       @order.shippable_date.should == Date.today
     end
 
     it "should return tomorrow when including no date in item name and ordered between 13:30 to 15:30 on holiday." do
-      pending("Today is weekday.") unless Date4.parse(Time.now.to_s).national_holiday?
+      Time.stub(:now).and_return(Time.new(2012,11,3,14,30))
       @order[2], @order[3] = Time.now.strftime("%Y/%m/%d"), "14:48:41"
       @order[4] = "【大型】600L冷蔵庫"
       @order.shippable_date.should == Date.today + 1
