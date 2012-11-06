@@ -23,7 +23,7 @@ describe Order::Rakuten do
       @order.preorder?.should == true
     end
 
-    it "should be true when not including date in item name." do
+    it "should be false when not including date in item name." do
       @order[4] = "【大型】600L冷蔵庫"
       @order.preorder?.should == false
     end
@@ -47,7 +47,7 @@ EOS
       @order.wish_date?.should == true
     end
 
-    it "should be true when including a wish time." do 
+    it "should be false when including a wish time." do 
       @order[45] = <<EOS
 [配送日時指定:]
 18:00〜20:00
@@ -55,7 +55,7 @@ EOS
       @order.wish_date?.should == false
     end
 
-    it "should be true when not including a wish date or time." do 
+    it "should be false when not including a wish date or time." do 
       @order[45] = <<EOS
 [配送日時指定:]
 EOS
@@ -64,7 +64,7 @@ EOS
   end
 
   describe "#wish_date" do
-    it "should return Date when including a wish date and time." do 
+    it "should return the Date when including a wish date and time." do 
       @order[45] = <<EOS
 [配送日時指定:]
 2012-11-01(木)
@@ -73,7 +73,7 @@ EOS
       @order.wish_date.should == Date.new(2012, 11, 1)
     end
 
-    it "should return Date when includeing a wish date." do 
+    it "should return the Date when includeing a wish date." do 
       @order[45] = <<EOS
 [配送日時指定:]
 2012-11-01(木)
@@ -98,13 +98,13 @@ EOS
   end
 
   describe "#shippable_date" do
-    it "should return Date when including this year date at item name." do
+    it "should return arrival date when including this year date at item name." do
       @order[2], @order[3] = "2012/10/30", "13:48:41"
       @order[4] = "【大型】【12月31日発送予定】600L冷蔵庫"
       @order.shippable_date.should == Date.new(Date.today.year, 12, 31)
     end
 
-    it "should return Date when including next year date at item name." do
+    it "should return arrival date when including next year date at item name." do
       @order[2], @order[3] = "2012/10/30", "13:48:41"
       @order[4] = "【大型】【1月01日発送予定】600L冷蔵庫"
       @order.shippable_date.should == Date.new(Date.today.year + 1, 1, 1)
@@ -129,7 +129,7 @@ EOS
       @order.shippable_date.should == Date.today
     end
 
-    it "should return today when including no date in item name and ordered between 13:30 to 15:30 on holiday." do
+    it "should return tomorrow when including no date in item name and ordered between 13:30 to 15:30 on holiday." do
       pending("Today is weekday.") unless Date4.parse(Time.now.to_s).national_holiday?
       @order[2], @order[3] = Time.now.strftime("%Y/%m/%d"), "14:48:41"
       @order[4] = "【大型】600L冷蔵庫"

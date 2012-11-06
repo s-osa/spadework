@@ -2,19 +2,20 @@
 require 'spadework/order/base'
 
 class Order::Rakuten < Order::Base
-  attr_accessor :ship_day, :delivery_day, :ship_way, :delivery_time, :notice, :notes, :direction, :message, :warning
+  attr_accessor :id, :ship_day, :delivery_day, :ship_way, :delivery_time, :notice, :notes, :direction, :message, :warning
 
   def initialize(arr)
     @arr = arr
-    @ship_day      = nil
-    @delivery_day  = nil
-    @ship_way      = nil
-    @delivery_time = nil
-    @notice        = nil
-    @notes         = nil
-    @direction     = nil
-    @message       = nil
-    @warning       = nil
+    @id            ||= arr[0]
+    @ship_day      ||= ""
+    @delivery_day  ||= ""
+    @ship_way      ||= ""
+    @delivery_time ||= ""
+    @notice        ||= ""
+    @notes         ||= ""
+    @direction     ||= ""
+    @message       ||= ""
+    @warning       ||= ""
   end
 
   def order_datetime
