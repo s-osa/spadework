@@ -1,4 +1,10 @@
 *~
+
+amazon/
+maido/
+plus/
+yahoo/
+
 *.gem
 *.rbc
 .bundle
