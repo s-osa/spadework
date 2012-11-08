@@ -18,5 +18,58 @@ class Order::Base < Array
 福岡県: 2, 佐賀県: 2, 長崎県: 2, 熊本県: 2, 大分県: 2, 宮崎県: 2, 鹿児島県: 2,
 沖縄県: 2
   }
+
+  attr_accessor :arr, :id, :status, :shipping_date, :delivery_date, :carrier, :delivery_time,
+                :notes, :domestic_notes,         :warning
+                #: direction, :message
+
+  def initialize(arr)
+    @arr = arr
+    @id             ||= arr[0]
+    @status         ||= ""
+    @shipping_date  ||= ""
+    @delivery_date  ||= ""
+    @carrier        ||= ""
+    @delivery_time  ||= ""
+    @notes          ||= ""
+    @domestic_notes ||= ""
+
+    @warning       ||= ""
+=begin
+    @direction     ||= ""
+    @message       ||= ""
+=end
+  end
+
+  def inspect
+    "<#{self.class}: >"
+  end
+
+  def to_s
+    result = []
+    self.instance_variables.each do |attr|
+      attr.to_s =~ /@(.+)/
+      result << self.method($1).call
+    end
+    result
+  end
+
+  def set_schedule_filter
+    if ! self.wish_date?
+      @shipping_date = self.shippable_date.strftime("%Y/%m/%d")
+      @delivery_date = (self.shippable_date + self.ship_days).strftime("%Y/%m/%d")
+    elsif self.wish_date >= self.shippable_date + 3
+      @shipping_date = (self.wish_date - 3 ).strftime("%Y/%m/%d")
+      @delivery_date = self.wish_date.strftime("%Y/%m/%d")
+    elsif self.wish_date >= self.shippable_date + self.ship_days
+      @shipping_date = self.shippable_date.strftime("%Y/%m/%d")
+      @delivery_date = self.wish_date.strftime("%Y/%m/%d")
+    else
+      @shipping_date = self.shippable_date.strftime("%Y/%m/%d")
+      @delivery_date = (self.shippable_date + self.ship_days).strftime("%Y/%m/%d")
+      @domestic_notes << "【希望日不可】\n"
+    end
+  end
+
 end
 

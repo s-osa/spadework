@@ -1,5 +1,5 @@
 # coding: utf-8
-module Order
+class Order
 end
 
 require 'spadework/order/base'
