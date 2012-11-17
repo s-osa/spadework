@@ -3,11 +3,20 @@
 class OrderList < Array
 end
 
-require 'spadework/orderlist/base'
-require 'spadework/orderlist/rakuten'
-
 class OrderList < Array
   attr_accessor :path, :type, :header, :orders  
+  OptionalHeader = [
+    "ステータス",
+    "指定出荷日",
+    "指定配送日",
+    "指定配送方法",
+    "指定配送時間",
+    "備考",
+    "社内備考",
+    "倉庫指示",
+    "連絡",
+    "警告",
+  ]
 
   def initialize(path)
     @path = path
@@ -19,7 +28,7 @@ class OrderList < Array
 #      @time = Order::Yahoo
     end
     reader = CSV.open(@path, "r:windows-31j")
-    @header = reader.shift.map { |col| col.to_s.encode("utf-8") }
+    @header = reader.shift.map{ |col| col.to_s.encode("utf-8") } + OptionalHeader
     @orders = reader.map{ |row| @type.new(row.map{|col| col.to_s.encode("utf-8") }) }
   end
 
@@ -29,5 +38,14 @@ class OrderList < Array
 
   def size
     self.orders.size + 1
+  end
+
+  def save_as(fname)
+    CSV.open(fname, "w:windows-31j") do |writer|
+      writer << self.header
+      self.orders.each do |order|
+        writer << order.to_a
+      end
+    end
   end
 end

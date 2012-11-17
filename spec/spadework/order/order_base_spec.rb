@@ -78,7 +78,7 @@ describe Order::Base do
       end
 
       it "should set alert in domestic_notes." do
-        @order.domestic_notes.should =~ /【希望日不可】/
+        @order.domestic_notes.should =~ /\[希望日不可\]/
       end
     end
   end

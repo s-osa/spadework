@@ -4,7 +4,7 @@ require 'spec_helper'
 describe OrderList do
   describe "Rakuten" do
     before do
-      dir = File.expand_path(File.dirname(__FILE__) + "../../../maido")
+      dir = File.expand_path(File.dirname(__FILE__) + "../../../import/maido")
       path = Dir.glob("#{dir}/*").first
      @orderlist = OrderList.new(path)
     end
@@ -25,6 +25,17 @@ describe OrderList do
     describe "#orders" do
       it "should return order rows in CSV." do
         @orderlist.orders.size.should == 2
+      end
+    end
+
+    describe "#save_as" do
+      it "should be able to save CSV" do
+        @orderlist.save_as("spec.csv")
+        File.exist?("spec.csv").should == true
+      end
+
+      after do
+       File.unlink("spec.csv") if File.exist? "spec.csv"
       end
     end
   end
