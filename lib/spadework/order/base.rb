@@ -17,6 +17,11 @@ class Order::Base < Array
     "沖縄県" => 2
   }
 
+  @@islands_zip = []
+  File.open("lib/spadework/data/islands.txt") do |file|
+    file.each_line{|line| @@islands_zip << line.strip}
+  end
+
   attr_accessor :arr, :id,
                 :status, :shipping_date, :delivery_date, :carrier, :delivery_time,
                 :notes, :domestic_notes, :direction, :message, :warning
@@ -60,6 +65,10 @@ class Order::Base < Array
     ]
   end
 
+  def island?
+    @@islands_zip.include? self.zipcode
+  end
+
   def set_schedule_filter
     if ! self.wish_date?
       @shipping_date = self.shippable_date.strftime("%Y/%m/%d")
@@ -76,6 +85,7 @@ class Order::Base < Array
       alert "[希望日不可]"
     end
   end
+
 protected
   def alert(str)
     @domestic_notes << str

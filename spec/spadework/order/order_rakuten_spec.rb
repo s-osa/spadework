@@ -200,4 +200,51 @@ EOS
       @order.ship_days.should == 2
     end
   end
+
+  describe "#size" do
+    it "should be huge when title include [引越]." do
+      @order.arr[4] = "SONY Bravia 120V型　送料無料・クレジットカードOK！　[引越]"
+      @order.size.should == :huge
+    end
+
+    it "should be xlarge when title include [特大]." do
+      @order.arr[4] = "SONY Bravia 80V型　送料無料・クレジットカードOK！　[特大]"
+      @order.size.should == :xlarge
+    end
+
+    it "should be large when title include [大型]." do
+      @order.arr[4] = "SONY Bravia 50V型　送料無料・クレジットカードOK！　[大型]"
+      @order.size.should == :large
+    end
+
+    it "should be regular when title include no tag." do
+      @order.arr[4] = "SONY Bravia 24V型　送料無料・クレジットカードOK！"
+      @order.size.should == :regular
+    end
+  end
+
+  describe "#zipcode" do
+    it "should be zipcode like 123-4567" do
+      @order.arr[28], @order.arr[29] = "123", "4567"
+      @order.zipcode.should == "123-4567"
+      @order.arr[28], @order.arr[29] = "240", "0067"
+      @order.zipcode.should == "240-0067"
+    end
+  end
+
+  describe "#island?" do
+    it "should be true  when zip is 043-1401." do
+      @order.arr[28], @order.arr[29] = "043", "1401"
+      @order.island?.should == true
+      @order.arr[28], @order.arr[29] = "998", "0281"
+      @order.island?.should == true
+    end
+
+    it "should be false when zip is 000-0000." do
+      @order.arr[28], @order.arr[29] = "144", "0052"
+      @order.island?.should == false
+      @order.arr[28], @order.arr[29] = "240", "0067"
+      @order.island?.should == false
+    end
+  end
 end

@@ -37,4 +37,15 @@ class Order::Rakuten < Order::Base
   def ship_days
     ShipDaysTo[@arr[30]]
   end
+
+  def size
+    return :huge    if self.arr[4] =~ /\[引越\]/
+    return :xlarge  if self.arr[4] =~ /\[特大\]/
+    return :large   if self.arr[4] =~ /\[大型\]/
+    return :regular
+  end
+
+  def zipcode
+    self.arr[28] << "-" << self.arr[29]
+  end
 end
