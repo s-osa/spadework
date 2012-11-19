@@ -4,7 +4,7 @@ require 'spec_helper'
 describe OrderList do
   describe "Rakuten" do
     before do
-      dir = File.expand_path(File.dirname(__FILE__) + "../../../import/maido")
+      dir = File.expand_path(File.dirname(__FILE__) + "../../../import/spec")
       path = Dir.glob("#{dir}/*").first
      @orderlist = OrderList.new(path)
     end

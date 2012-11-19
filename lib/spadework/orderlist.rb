@@ -22,7 +22,7 @@ class OrderList < Array
     @path = path
     if @path =~ /\d{10,10}.txt/
 #      @type = Order::Amazon
-    elsif @path =~ /rakuten/
+    elsif @path =~ /[\d \(\)]+.csv/
       @type = Order::Rakuten
     elsif @path =~ /default_all_orders/
 #      @time = Order::Yahoo

@@ -35,6 +35,6 @@ class Order::Rakuten < Order::Base
   end
 
   def ship_days
-    ShipDaysTo[@arr[30].to_sym]
+    ShipDaysTo[@arr[30]]
   end
 end

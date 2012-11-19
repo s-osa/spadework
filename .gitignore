@@ -2,10 +2,8 @@
 #*
 .#*
 
-amazon/
-maido/
-plus/
-yahoo/
+import/
+export/
 
 *.gem
 *.rbc
