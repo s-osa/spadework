@@ -20,6 +20,10 @@ class Order::Rakuten < Order::Base
     Date.new($1.to_i, $2.to_i, $3.to_i)
   end
 
+  def wish_time?
+    @arr[45] =~ /\d{1,2}:\d{2}〜\d{2}:\d{2}/ ? true : false
+  end
+
   def shippable_date
     if self.preorder?
       @arr[4] =~ /【(\d{1,2})月(\d{1,2})日/

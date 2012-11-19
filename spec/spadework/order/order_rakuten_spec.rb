@@ -149,6 +149,40 @@ EOS
     end
   end
 
+  describe "#wish_time?" do
+    it "should be true when including a wish date and time." do 
+      @order.arr[45] = <<EOS
+[配送日時指定:]
+2012-11-01(木)
+18:00〜20:00
+EOS
+      @order.wish_time?.should == true
+    end
+
+    it "should be false when includeing a wish date." do 
+      @order.arr[45] = <<EOS
+[配送日時指定:]
+2012-11-01(木)
+EOS
+      @order.wish_time?.should == false
+    end
+
+    it "should be true when including a wish time." do 
+      @order.arr[45] = <<EOS
+[配送日時指定:]
+18:00〜20:00
+EOS
+      @order.wish_time?.should == true
+    end
+
+    it "should be false when not including a wish date or time." do 
+      @order.arr[45] = <<EOS
+[配送日時指定:]
+EOS
+      @order.wish_time?.should == false
+    end
+  end
+
   describe "#shippable_date" do
     it "should return arrival date when including this year date at item name." do
       @order.arr[2], @order.arr[3] = "2012/10/30", "13:48:41"

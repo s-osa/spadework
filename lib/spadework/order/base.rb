@@ -86,6 +86,26 @@ class Order::Base < Array
     end
   end
 
+  def set_carrier_filter
+    if  self.size == :huge
+      self.carrier = "ヤマトHC"
+      alert "[引越]"
+    elsif self.island?
+      self.carrier = self.size == :xlarge ? "ヤマト便" : "ヤマト運輸"
+      case self.size
+      when :xlarge
+        alert "[離島大型]"
+      when :large
+        alert "[離島]"
+      end
+    elsif self.size == :xlarge
+      self.carrier = "ヤマト便"
+      alert "[時間指定不可]" if self.wish_time?
+    elsif false
+    elsif self.wish_date && self.wish_date >= self.shippable_date + 2
+    end
+  end
+
 protected
   def alert(str)
     @domestic_notes << str
