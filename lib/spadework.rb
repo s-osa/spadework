@@ -18,6 +18,7 @@ Stores.each do |store|
     orderlist = OrderList.new(loadpath)
     orderlist.orders.each do |order|
       order.set_schedule_filter
+      order.set_carrier_filter
     end
 
     (1..2).each do |num|
