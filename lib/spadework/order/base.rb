@@ -70,7 +70,7 @@ class Order::Base < Array
   end
 
   def set_schedule_filter
-    if ! self.wish_date?
+    if ! self.wish_date
       @shipping_date = self.shippable_date.strftime("%Y/%m/%d")
       @delivery_date = (self.shippable_date + self.ship_days).strftime("%Y/%m/%d")
     elsif self.wish_date >= self.shippable_date + 3
@@ -88,21 +88,18 @@ class Order::Base < Array
 
   def set_carrier_filter
     if  self.size == :huge
-      self.carrier = "ヤマトHC"
-      alert "[引越]"
+      @carrier = "ヤマトHC" ; alert "[引越]"
     elsif self.island?
-      self.carrier = self.size == :xlarge ? "ヤマト便" : "ヤマト運輸"
-      case self.size
-      when :xlarge
-        alert "[離島大型]"
-      when :large
-        alert "[離島]"
-      end
+      @carrier = (self.size == :xlarge) ? "ヤマト便" : "ヤマト運輸"
+      alert self.size == :xlarge ? "[離島大型]" : "[離島]"
     elsif self.size == :xlarge
-      self.carrier = "ヤマト便"
-      alert "[時間指定不可]" if self.wish_time?
-    elsif false
+      self.set_yamato
+    elsif %w(鳥取県 島根県 岡山県 広島県 山口県 香川県 徳島県 愛媛県 高知県 青森県 和歌山県).include? self.pref
+      self.set_yamato
     elsif self.wish_date && self.wish_date >= self.shippable_date + 2
+      @carrier = "佐川急便"
+    else
+      self.set_yamato
     end
   end
 
@@ -113,6 +110,16 @@ protected
 
   def info(str)
     @warning << str
+  end
+
+  def set_yamato
+    if self.size == :xlarge || self.size == :large
+      @carrier = "ヤマト便"
+      alert "[時間指定不可]" if self.wish_time?
+    elsif self.size == :regular
+      @carrier = "ヤマト運輸"
+      alert "[時間指定可？]" if self.wish_time?
+    end
   end
 end
 

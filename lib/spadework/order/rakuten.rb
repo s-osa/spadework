@@ -2,6 +2,10 @@
 require 'spadework/order/base'
 
 class Order::Rakuten < Order::Base
+  def pref
+    @arr[30]
+  end
+
   def order_datetime
     DateTime.parse(@arr[2] + " " + @arr[3])
   end
@@ -10,12 +14,8 @@ class Order::Rakuten < Order::Base
     @arr[4] =~ /【\d{1,2}月\d{1,2}日/ ? true : false
   end
 
-  def wish_date?
-    @arr[45] =~ /\d{4}-\d{2}-\d{2}\(.\)/ ? true : false
-  end
-
   def wish_date
-    return nil unless self.wish_date?
+    return nil unless @arr[45] =~ /\d{4}-\d{2}-\d{2}\(.\)/
     @arr[45] =~ /(\d{4})-(\d{2})-(\d{2})\(.\)/
     Date.new($1.to_i, $2.to_i, $3.to_i)
   end
@@ -39,7 +39,7 @@ class Order::Rakuten < Order::Base
   end
 
   def ship_days
-    ShipDaysTo[@arr[30]]
+    ShipDaysTo[self.pref]
   end
 
   def size

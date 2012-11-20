@@ -81,104 +81,46 @@ describe Order::Rakuten do
     end
   end
 
-  describe "#wish_date?" do
-    it "should be true when including a wish date and time." do 
-      @order.arr[45] = <<EOS
-[配送日時指定:]
-2012-11-01(木)
-18:00〜20:00
-EOS
-      @order.wish_date?.should == true
-    end
-
-    it "should be true when includeing a wish date." do 
-      @order.arr[45] = <<EOS
-[配送日時指定:]
-2012-11-01(木)
-EOS
-      @order.wish_date?.should == true
-    end
-
-    it "should be false when including a wish time." do 
-      @order.arr[45] = <<EOS
-[配送日時指定:]
-18:00〜20:00
-EOS
-      @order.wish_date?.should == false
-    end
-
-    it "should be false when not including a wish date or time." do 
-      @order.arr[45] = <<EOS
-[配送日時指定:]
-EOS
-      @order.wish_date?.should == false
-    end
-  end
-
   describe "#wish_date" do
     it "should return the Date when including a wish date and time." do 
-      @order.arr[45] = <<EOS
-[配送日時指定:]
-2012-11-01(木)
-18:00〜20:00
-EOS
+      @order.arr[45] = "[配送日時指定:]\n2012-11-01(木)\n18:00〜20:00"
       @order.wish_date.should == Date.new(2012, 11, 1)
     end
 
     it "should return the Date when includeing a wish date." do 
-      @order.arr[45] = <<EOS
-[配送日時指定:]
-2012-11-01(木)
-EOS
+      @order.arr[45] = "[配送日時指定:]\n2012-11-01(木)"
       @order.wish_date.should == Date.new(2012, 11, 1)
     end
 
     it "should return nil when including a wish time." do 
-      @order.arr[45] = <<EOS
-[配送日時指定:]
-18:00〜20:00
-EOS
+      @order.arr[45] = "[配送日時指定:]\n18:00〜20:00"
       @order.wish_date.should == nil
     end
 
     it "should return nil when not including a wish date or time." do 
-      @order.arr[45] = <<EOS
-[配送日時指定:]
-EOS
+      @order.arr[45] = "[配送日時指定:]"
       @order.wish_date.should == nil
     end
   end
 
   describe "#wish_time?" do
     it "should be true when including a wish date and time." do 
-      @order.arr[45] = <<EOS
-[配送日時指定:]
-2012-11-01(木)
-18:00〜20:00
-EOS
+      @order.arr[45] = "[配送日時指定:]\n2012-11-01(木)\n18:00〜20:00"
       @order.wish_time?.should == true
     end
 
     it "should be false when includeing a wish date." do 
-      @order.arr[45] = <<EOS
-[配送日時指定:]
-2012-11-01(木)
-EOS
+      @order.arr[45] = "[配送日時指定:]\n2012-11-01(木)"
       @order.wish_time?.should == false
     end
 
     it "should be true when including a wish time." do 
-      @order.arr[45] = <<EOS
-[配送日時指定:]
-18:00〜20:00
-EOS
+      @order.arr[45] = "[配送日時指定:]\n18:00〜20:00"
       @order.wish_time?.should == true
     end
 
     it "should be false when not including a wish date or time." do 
-      @order.arr[45] = <<EOS
-[配送日時指定:]
-EOS
+      @order.arr[45] = "[配送日時指定:]"
       @order.wish_time?.should == false
     end
   end
