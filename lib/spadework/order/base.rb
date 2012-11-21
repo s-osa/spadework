@@ -18,18 +18,12 @@ class Order::Base < Array
   }
 
   @@islands_zip = []
-  File.open("lib/spadework/data/islands.txt") do |file|
-    file.each_line{|line| @@islands_zip << line.strip}
-  end
+  File.open("lib/spadework/data/islands.txt"){ |file| file.each_line{|line| @@islands_zip << line.strip} }
 
-  attr_accessor :arr, :id,
-                :status, :shipping_date, :delivery_date, :carrier, :delivery_time,
-                :notes, :domestic_notes, :direction, :message, :warning
+  attr_accessor :arr,:status,:shipping_date,:delivery_date,:carrier,:delivery_time,:notes,:domestic_notes,:direction,:message,:warning
 
   def initialize(arr)
     @arr  = arr
-    @id ||= arr[0]
-
     @status         ||= ""
     @shipping_date  ||= ""
     @delivery_date  ||= ""
@@ -42,13 +36,8 @@ class Order::Base < Array
     @warning        ||= ""
   end
 
-  def inspect
-    "<#{self.class}: >"
-  end
-
-  def to_s
-    self.to_a
-  end
+  def inspect ; "<#{self.class}: >" ; end
+  def to_s    ; self.to_a           ; end
 
   def to_a
     @arr + [
@@ -68,6 +57,35 @@ class Order::Base < Array
   def island?
     @@islands_zip.include? self.zipcode
   end
+
+  def ship_days
+    ShipDaysTo[self.pref]
+  end
+
+  def size
+    return :huge    if self.title =~ /\[引越\]/
+    return :xlarge  if self.title =~ /\[特大\]/
+    return :large   if self.title =~ /\[大型\]/
+    return :regular
+  end
+
+  def arrival_date
+    Date.new(Date.today.year+($1.to_i >= Date.today.month ? 0 : 1), $1.to_i, $2.to_i) if self.title =~ /【(\d{1,2})月(\d{1,2})日/
+  end
+
+  def shippable_date
+    if self.arrival_date
+      self.arrival_date
+    elsif self.order_datetime < DateTime.new(Time.now.year, Time.now.month, Time.now.day, 13, 30)
+      Date.today
+    elsif self.order_datetime > DateTime.new(Time.now.year, Time.now.month, Time.now.day, 15, 30)
+      Date.today + 1
+    else
+      Date4.parse(self.order_datetime.to_s).national_holiday? ? Date.today + 1 : Date.today
+    end
+  end
+
+#### Filters ####
 
   def set_schedule_filter
     if ! self.wish_date
@@ -104,21 +122,16 @@ class Order::Base < Array
   end
 
 protected
-  def alert(str)
-    @domestic_notes << str
-  end
-
-  def info(str)
-    @warning << str
-  end
+  def alert(str) ; @domestic_notes << str ; end
+  def info(str)  ; @warning << str        ; end
 
   def set_yamato
     if self.size == :xlarge || self.size == :large
       @carrier = "ヤマト便"
-      alert "[時間指定不可]" if self.wish_time?
+      alert "[時間指定不可]" if self.wish_time
     elsif self.size == :regular
       @carrier = "ヤマト運輸"
-      alert "[時間指定可？]" if self.wish_time?
+      alert "[時間指定可？]" if self.wish_time
     end
   end
 end

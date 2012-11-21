@@ -8,221 +8,114 @@ describe Order::Base do
 #    @order = Order::Rakuten.new(arr)
   end
 
-  describe "#set_schedule_filter" do
-    before do
-      @order = Order::Rakuten.new([])
-      @order.stub(:shippable_date).and_return(Date.new(2012,11,1))
-      @order.stub(:ship_days).and_return(2)
+  before do
+    @order = Order::Rakuten.new([])
+  end
+
+  describe "#island?" do
+    it "should be true  when zip is 043-1401." do
+      @order.stub(:zipcode).and_return("998-0281")
+      @order.island?.should == true
     end
 
-    describe "when no wish_date" do
-      before do
-        @order.stub(:wish_date).and_return(nil)
-        @order.set_schedule_filter
-      end
-
-      it "should set shippable_date as shipping_date." do
-        @order.shipping_date.should == "2012/11/01"
-      end
-
-      it "should set shippable_date + ship_days as delivery_date." do
-        @order.delivery_date.should == "2012/11/03"
-      end
-    end
-
-    describe "when wish_date is later than 3 days" do
-      before do
-        @order.stub(:wish_date).and_return(Date.new(2012,11,20))
-        @order.set_schedule_filter
-      end
-
-      it "should set wish_date - 3 days as shipping_date." do
-        @order.shipping_date.should == "2012/11/17"
-      end
-
-      it "should set wishdate as delivery_date." do
-        @order.delivery_date.should == "2012/11/20"
-      end
-    end
-
-    describe "when wish_date is in 2days" do
-      before do
-        @order.stub(:wish_date).and_return(Date.new(2012,11,3))
-        @order.set_schedule_filter
-      end
-
-      it "should set shippable_date as shipping_date." do
-        @order.shipping_date.should == "2012/11/01"
-      end
-
-      it "should set wish_date as delivery_date." do
-        @order.delivery_date.should == "2012/11/03"
-      end
-    end
-
-    describe "when wish_date is too close" do
-      before do
-        @order.stub(:wish_date).and_return(Date.new(2012,11,2))
-        @order.set_schedule_filter
-      end
-
-      it "should set shippable_date as shipping_date." do
-        @order.shipping_date.should == "2012/11/01"
-      end
-
-      it "should set shippable_date + ship_days as delivery_date." do
-        @order.delivery_date.should == "2012/11/03"
-      end
-
-      it "should set alert in domestic_notes." do
-        @order.domestic_notes.should =~ /\[希望日不可\]/
-      end
+    it "should be false when zip is 240-0067." do
+      @order.stub(:zipcode).and_return("240-0067")
+      @order.island?.should == false
     end
   end
 
-  describe "#set_carrier_filter" do
+  describe "#ship_days" do
+    it "should be 1 when Tokyo." do
+      @order.stub(:pref).and_return("東京都")
+      @order.ship_days.should == 1
+    end
+
+    it "should be 2 when Hokkaido." do
+      @order.stub(:pref).and_return("北海道")
+      @order.ship_days.should == 2
+    end
+  end
+
+  describe "#size" do
+    it "should be huge when title include [引越]." do
+      @order.stub(:title).and_return("SONY Bravia 120V型　送料無料・クレジットカードOK！　[引越]")
+      @order.size.should == :huge
+    end
+
+    it "should be xlarge when title include [特大]." do
+      @order.stub(:title).and_return("SONY Bravia 120V型　送料無料・クレジットカードOK！　[特大]")
+      @order.size.should == :xlarge
+    end
+
+    it "should be large when title include [大型]." do
+      @order.stub(:title).and_return("SONY Bravia 120V型　送料無料・クレジットカードOK！　[大型]")
+      @order.size.should == :large
+    end
+
+    it "should be regular when title include no tag." do
+      @order.stub(:title).and_return("SONY Bravia 24V型　送料無料・クレジットカードOK！")
+      @order.size.should == :regular
+    end
+  end
+ 
+  describe "#arrival_date" do
     before do
-      @order = Order::Rakuten.new([])
+      Date.stub(:today).and_return(Date.new(2012,10,10))
     end
 
-    describe "when size of item is huge" do
-      it "should set ヤマトHC as carrier." do
-        @order.stub(:size).and_return(:huge)
-        @order.set_carrier_filter
-        @order.carrier.should == "ヤマトHC"
-        @order.domestic_notes.should =~ /\[引越\]/
-      end
+    it "should be Date when title include arrival date." do
+      @order.stub(:title).and_return("【12月12日入荷予定】テレビ")
+      @order.arrival_date.should == Date.new(2012,12,12)
     end
 
-    describe "when deliver to island" do
-      before do
-        @order.stub(:island?).and_return(true)
-      end
-
-      it "should set ヤマト便 as carrier, 離島大型 as domestic_notes." do
-        @order.stub(:size).and_return(:xlarge)
-        @order.set_carrier_filter
-        @order.carrier.should == "ヤマト便"
-        @order.domestic_notes.should =~ /\[離島大型\]/
-      end
-
-      it "should set ヤマト運輸 as carrier, 離島 as domestic_notes." do
-        @order.stub(:size).and_return(:large)
-        @order.set_carrier_filter
-        @order.carrier.should == "ヤマト運輸"
-        @order.domestic_notes.should =~ /\[離島\]/
-      end
+    it "should be Date on next year when title include arrival date on next year." do
+      @order.stub(:title).and_return("【2月12日入荷予定】テレビ")
+      @order.arrival_date.should == Date.new(2013,2,12)
     end
 
-    describe "when size is xlarge" do
-      before do
-        @order.stub(:island?).and_return(false)
-        @order.stub(:size).and_return(:xlarge)
-      end
+    it "should be nil when title does not include arrival date." do
+      @order.stub(:title).and_return("テレビ")
+      @order.arrival_date.should == nil
+    end
+  end
 
-      it "should set ヤマト便 as carrier." do
-        @order.stub(:wish_time?).and_return(false)
-        @order.set_carrier_filter
-        @order.carrier.should == "ヤマト便"
-        @order.domestic_notes.should_not =~ /\[時間指定不可\]/
-      end
-
-      it "should set ヤマト便 as carrier, 時間指定不可 as wish_time if wish_time." do
-        @order.stub(:wish_time?).and_return(true)
-        @order.set_carrier_filter
-        @order.carrier.should == "ヤマト便"
-        @order.domestic_notes.should =~ /\[時間指定不可\]/
-      end
+  describe "#shippable_date" do
+    it "should return arrival date when including this year date at item name." do
+      @order.arr[2], @order.arr[3] = "2012/10/30", "13:48:41"
+      @order.arr[4] = "【大型】【12月31日発送予定】600L冷蔵庫"
+      @order.shippable_date.should == Date.new(Date.today.year, 12, 31)
     end
 
-    describe "when ship to Chugoku, Shikoku, Aomori or Wakayama." do
-      before do
-        @order.stub(:island?).and_return(false)
-        @order.stub(:pref).and_return("鳥取県")
-      end
-
-      it "should set ヤマト便 as carrier." do
-        @order.stub(:size).and_return(:large)
-        @order.stub(:wish_time?).and_return(false)
-        @order.set_carrier_filter
-        @order.carrier.should == "ヤマト便"
-        @order.domestic_notes.should_not =~ /\[時間指定\]/
-      end
-
-      it "should set ヤマト便 as carrier, 時間指定不可 as wish_time if wish_time." do
-        @order.stub(:size).and_return(:large)
-        @order.stub(:wish_time?).and_return(true)
-        @order.set_carrier_filter
-        @order.carrier.should == "ヤマト便"
-        @order.domestic_notes.should =~ /\[時間指定不可\]/
-      end
-
-      it "should set ヤマト運輸 as carrier." do
-        @order.stub(:size).and_return(:regular)
-        @order.stub(:wish_time?).and_return(false)
-        @order.set_carrier_filter
-        @order.carrier.should == "ヤマト運輸"
-        @order.domestic_notes.should_not =~ /\[時間指定\]/
-      end
-
-      it "should set ヤマト運輸 as carrier, 時間指定不可 as wish_time if wish_time." do
-        @order.stub(:size).and_return(:regular)
-        @order.stub(:wish_time?).and_return(true)
-        @order.set_carrier_filter
-        @order.carrier.should == "ヤマト運輸"
-        @order.domestic_notes.should =~ /\[時間指定可？\]/
-      end
+    it "should return arrival date when including next year date at item name." do
+      @order.arr[2], @order.arr[3] = "2012/10/30", "13:48:41"
+      @order.arr[4] = "【大型】【1月01日発送予定】600L冷蔵庫"
+      @order.shippable_date.should == Date.new(Date.today.year + 1, 1, 1)
     end
 
-    describe "when 2 days or more to wish_date." do
-      it "should set ヤマト便 as carrier." do
-        @order.stub(:size).and_return(:large)
-        @order.stub(:island?).and_return(false)
-        @order.stub(:pref).and_return("東京都")
-        @order.stub(:shippable_date).and_return(Date.today)
-        @order.stub(:wish_date).and_return(Date.today+4)
-        @order.set_carrier_filter
-        @order.carrier.should == "佐川急便"
-      end
+    it "should return today when including no date in item name and ordered before 13:30." do
+      @order.arr[2], @order.arr[3] = Time.now.strftime("%Y/%m/%d"), "12:48:41"
+      @order.arr[4] = "【大型】600L冷蔵庫"
+      @order.shippable_date.should == Date.today
     end
 
-    describe "when else." do
-      before do
-        @order.stub(:island?).and_return(false)
-        @order.stub(:pref).and_return("東京都")
-      end
+    it "should return tomorrow when including no date in item name and ordered after 15:30." do
+      @order.arr[2], @order.arr[3] = Time.now.strftime("%Y/%m/%d"), "15:48:41"
+      @order.arr[4] = "【大型】600L冷蔵庫"
+      @order.shippable_date.should == Date.today + 1
+    end
 
-      it "should set ヤマト便 as carrier." do
-        @order.stub(:size).and_return(:large)
-        @order.stub(:wish_time?).and_return(false)
-        @order.set_carrier_filter
-        @order.carrier.should == "ヤマト便"
-        @order.domestic_notes.should_not =~ /\[時間指定\]/
-      end
+    it "should return today when including no date in item name and ordered between 13:30 to 15:30 on weekday." do
+      Time.stub(:now).and_return(Time.new(2012,11,5,14,30))
+      @order.arr[2], @order.arr[3] = Time.now.strftime("%Y/%m/%d"), "14:48:41"
+      @order.arr[4] = "【大型】600L冷蔵庫"
+      @order.shippable_date.should == Date.today
+    end
 
-      it "should set ヤマト便 as carrier, 時間指定不可 as wish_time if wish_time." do
-        @order.stub(:size).and_return(:large)
-        @order.stub(:wish_time?).and_return(true)
-        @order.set_carrier_filter
-        @order.carrier.should == "ヤマト便"
-        @order.domestic_notes.should =~ /\[時間指定不可\]/
-      end
-
-      it "should set ヤマト運輸 as carrier." do
-        @order.stub(:size).and_return(:regular)
-        @order.stub(:wish_time?).and_return(false)
-        @order.set_carrier_filter
-        @order.carrier.should == "ヤマト運輸"
-        @order.domestic_notes.should_not =~ /\[時間指定\]/
-      end
-
-      it "should set ヤマト運輸 as carrier, 時間指定不可 as wish_time if wish_time." do
-        @order.stub(:size).and_return(:regular)
-        @order.stub(:wish_time?).and_return(true)
-        @order.set_carrier_filter
-        @order.carrier.should == "ヤマト運輸"
-        @order.domestic_notes.should =~ /\[時間指定可？\]/
-      end
+    it "should return tomorrow when including no date in item name and ordered between 13:30 to 15:30 on holiday." do
+      Time.stub(:now).and_return(Time.new(2012,11,3,14,30))
+      @order.arr[2], @order.arr[3] = Time.now.strftime("%Y/%m/%d"), "14:48:41"
+      @order.arr[4] = "【大型】600L冷蔵庫"
+      @order.shippable_date.should == Date.today + 1
     end
   end
 end
