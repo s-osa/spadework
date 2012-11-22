@@ -2,7 +2,6 @@
 $LOAD_PATH.unshift(File.expand_path(File.dirname(__FILE__)))
 require 'spadework/order'
 require 'spadework/orderlist'
-require 'csv'
 require 'fileutils'
 
 ExportDir = File.expand_path(File.dirname(__FILE__) + "/../export")
@@ -20,6 +19,7 @@ Stores.each do |store|
       #### Add filters in this block ###########################################
       order.set_schedule_filter
       order.set_carrier_filter
+      order.set_status_filter   # This filter must be put on under all filters!!
     end
 
     (1..2).each do |num|
