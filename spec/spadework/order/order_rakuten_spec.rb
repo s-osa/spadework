@@ -85,6 +85,13 @@ describe Order::Rakuten do
     end
   end
 
+  describe "#payment_method" do
+    it "should be card" do 
+      @order.arr[37] = "クレジットカード"
+      @order.payment_method.should == :card
+    end
+  end
+
   describe "#wish_date" do
     it "should return the Date when including a wish date and time." do 
       @order.arr[45] = "[配送日時指定:]\n2012-11-01(木)\n18:00〜20:00"
@@ -126,6 +133,30 @@ describe Order::Rakuten do
     it "should be nil when not including a wish date or time." do 
       @order.arr[45] = "[配送日時指定:]"
       @order.wish_time.should == nil
+    end
+  end
+
+  describe "#demand" do
+    it "should be string when something written." do 
+      @order.arr[45] = "[配送日時指定:]\n2012-11-01(木)\n18:00〜20:00\n領収書希望"
+      @order.demand.should == "領収書希望"
+    end
+
+    it "should be nil when nothing written." do 
+      @order.arr[45] = "[配送日時指定:]\n2012-11-01(木)\n18:00〜20:00\n"
+      @order.demand.should == ""
+    end
+  end
+
+  describe "#memo" do
+    it "should be memo when something written." do
+      @order.arr[63] = "不正"
+      @order.memo.should == "不正"
+    end
+
+    it "should be nil when nothing written." do
+      @order.arr[63] = nil
+      @order.memo.should == ""
     end
   end
 end

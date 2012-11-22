@@ -85,6 +85,18 @@ class Order::Base < Array
     end
   end
 
+  def payment_method(str)
+    if str =~ /カード/ || str =~ /Card/ || str.empty?
+      :card
+    elsif str =~ /代金引換/ || str =~ /COD/
+      :cod
+    else
+      :other
+    end
+  end
+
+  def memo ; "" ; end
+
 #### Filters ####
 
   def set_schedule_filter
@@ -120,6 +132,17 @@ class Order::Base < Array
       self.set_yamato
     end
   end
+
+  def set_status_filter
+    return if self.payment_method != :card && self.payment_method != :cod
+    if (self.domestic_notes + self.memo + self.demand).empty?
+      @status = "出荷準備OK"
+    else
+      @status = "確認待"
+    end
+  end
+
+
 
 protected
   def alert(str) ; @domestic_notes << str ; end

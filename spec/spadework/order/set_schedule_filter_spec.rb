@@ -1,4 +1,5 @@
 # coding: utf-8
+require 'spec_helper'
 
 describe "Filter: set_schedule_filter" do
   describe "#set_schedule_filter" do

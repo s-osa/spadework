@@ -118,4 +118,28 @@ describe Order::Base do
       @order.shippable_date.should == Date.today + 1
     end
   end
+
+  describe "#payment_method" do
+    before do 
+      @order = Order::Base.new([])
+    end
+
+    it "should be card when argument includes String like カード." do
+      @order.payment_method("クレジットカード").should == :card
+      @order.payment_method("YahooCreditCardSettle").should == :card
+      @order.payment_method("").should == :card
+    end
+
+    it "should be cod when argument includes String like 代金引換." do
+      @order.payment_method("代金引換").should == :cod
+      @order.payment_method("代金引換（代引き）").should == :cod
+      @order.payment_method("COD").should == :cod
+    end
+
+    it "should be other when argument does not includes something like above." do
+      @order.payment_method("銀行振込").should == :other
+      @order.payment_method("銀行振込（前払い）").should == :other
+      @order.payment_method("NT_CVS_Seven").should == :other
+    end
+  end
 end
