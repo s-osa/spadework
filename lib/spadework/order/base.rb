@@ -1,6 +1,5 @@
 # coding: utf-8
 require 'date'
-require 'date4'
 require 'date4/holiday'
 
 class Order::Base < Array
@@ -54,13 +53,8 @@ class Order::Base < Array
     ]
   end
 
-  def island?
-    @@islands_zip.include? self.zipcode
-  end
-
-  def ship_days
-    ShipDaysTo[self.pref]
-  end
+  def island? ; @@islands_zip.include? self.zipcode ; end
+  def ship_days ; ShipDaysTo[self.pref] ; end
 
   def size
     return :huge    if self.title =~ /\[引越\]/
@@ -141,8 +135,6 @@ class Order::Base < Array
       @status = "確認待"
     end
   end
-
-
 
 protected
   def alert(str) ; @domestic_notes << str ; end

@@ -1,10 +1,6 @@
 # coding: utf-8
 
 class OrderList < Array
-end
-
-class OrderList < Array
-  attr_accessor :path, :type, :header, :orders  
   OptionalHeader = [
     "ステータス",
     "指定出荷日",
@@ -17,6 +13,8 @@ class OrderList < Array
     "連絡",
     "警告",
   ]
+
+  attr_accessor :path, :type, :header, :orders  
 
   def initialize(path)
     @path = path
@@ -32,20 +30,13 @@ class OrderList < Array
     @orders = reader.map{ |row| @type.new(row.map{|col| col.to_s.encode("utf-8") }) }
   end
 
-  def inspect
-    [@path, @type, @header, @orders]
-  end
-
-  def size
-    self.orders.size + 1
-  end
+  def inspect ; [@path, @type, @header, @orders] ; end
+  def size ; self.orders.size + 1 ; end
 
   def save_as(fname)
     CSV.open(fname, "w:windows-31j") do |writer|
       writer << self.header
-      self.orders.each do |order|
-        writer << order.to_a
-      end
+      self.orders.each{ |order| writer << order.to_a }
     end
   end
 end
