@@ -149,7 +149,7 @@ protected
       alert "[時間指定不可]" if self.wish_time
     elsif self.size == :regular
       @carrier = "ヤマト運輸"
-      alert "[時間指定可？]" if self.wish_time
+      alert "[時間指定可？]" if ["午前", "12:00-14:00", "14:00-16:00"].include? self.wish_time
     end
   end
 end

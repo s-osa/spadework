@@ -86,12 +86,20 @@ describe "Filter: set_carrier_filter" do
       @order.domestic_notes.should_not =~ /\[時間指定\]/
     end
 
-    it "should set ヤマト運輸 as carrier, 時間指定不可 as wish_time if wish_time." do
+    it "should set ヤマト運輸 as carrier, 時間指定可？ as alert if wish_time before 16." do
       @order.stub(:size).and_return(:regular)
-      @order.stub(:wish_time).and_return(true)
+      @order.stub(:wish_time).and_return("14:00-16:00")
       @order.set_carrier_filter
       @order.carrier.should == "ヤマト運輸"
       @order.domestic_notes.should =~ /\[時間指定可？\]/
+    end
+
+    it "should set ヤマト運輸 as carrier if wish_time after 16." do
+      @order.stub(:size).and_return(:regular)
+      @order.stub(:wish_time).and_return("16:00-18:00")
+      @order.set_carrier_filter
+      @order.carrier.should == "ヤマト運輸"
+      @order.domestic_notes.should_not =~ /\[時間指定可？\]/
     end
   end
 
@@ -147,15 +155,23 @@ describe "Filter: set_carrier_filter" do
       @order.stub(:wish_time).and_return(nil)
       @order.set_carrier_filter
       @order.carrier.should == "ヤマト運輸"
-      @order.domestic_notes.should_not =~ /\[時間指定\]/
+      @order.domestic_notes.should_not =~ /\[時間指定[^\]]+\]/
     end
 
-    it "should set ヤマト運輸 as carrier, 時間指定不可 as wish_time if wish_time." do
+    it "should set ヤマト運輸 as carrier, 時間指定可？ as wish_time if wish_time before 16." do
       @order.stub(:size).and_return(:regular)
       @order.stub(:wish_time).and_return("12:00-14:00")
       @order.set_carrier_filter
       @order.carrier.should == "ヤマト運輸"
       @order.domestic_notes.should =~ /\[時間指定可？\]/
+    end
+
+    it "should set ヤマト運輸 as carrier if wish_time after 16." do
+      @order.stub(:size).and_return(:regular)
+      @order.stub(:wish_time).and_return("16:00-18:00")
+      @order.set_carrier_filter
+      @order.carrier.should == "ヤマト運輸"
+      @order.domestic_notes.should_not =~ /\[時間指定可？\]/
     end
   end
 end
