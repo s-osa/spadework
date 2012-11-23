@@ -21,10 +21,10 @@ class OrderList < Array
     @path = path
     if @path =~ /\d{10,10}.txt/
 #      @type = Order::Amazon
-    elsif @path =~ /[\d \(\)]+.csv/
-      @type = Order::Rakuten
     elsif @path =~ /default_all_orders/
 #      @time = Order::Yahoo
+    elsif @path =~ /[\w \(\)]+.csv/
+      @type = Order::Rakuten
     end
     reader = CSV.open(@path, "r:windows-31j")
     @header = reader.shift.map{ |col| col.to_s.encode("utf-8") } + OptionalHeader
