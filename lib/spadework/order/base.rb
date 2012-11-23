@@ -132,9 +132,6 @@ class Order::Base < Array
     if (self.domestic_notes + self.memo + self.demand).empty?
       @status = "出荷準備OK"
     else
-      alert "domestic_notes #{self.domestic_notes}" unless self.domestic_notes.empty?
-      alert "memo #{self.memo}" unless self.memo.empty?
-      alert "demand #{self.demand}" unless self.demand.empty?
       @status = "確認待"
     end
   end
