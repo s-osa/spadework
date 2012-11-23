@@ -120,7 +120,7 @@ class Order::Base < Array
       self.set_yamato
     elsif %w(鳥取県 島根県 岡山県 広島県 山口県 香川県 徳島県 愛媛県 高知県 青森県 和歌山県).include? self.pref
       self.set_yamato
-    elsif self.wish_date && self.wish_date >= self.shippable_date + 2
+    elsif self.wish_date.nil? || self.wish_date >= self.shippable_date + 2
       @carrier = "佐川急便"
     else
       self.set_yamato
@@ -132,6 +132,9 @@ class Order::Base < Array
     if (self.domestic_notes + self.memo + self.demand).empty?
       @status = "出荷準備OK"
     else
+      alert "domestic_notes #{self.domestic_notes}" unless self.domestic_notes.empty?
+      alert "memo #{self.memo}" unless self.memo.empty?
+      alert "demand #{self.demand}" unless self.demand.empty?
       @status = "確認待"
     end
   end

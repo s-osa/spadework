@@ -94,7 +94,7 @@ describe Order::Rakuten do
 
   describe "#wish_date" do
     it "should return the Date when including a wish date and time." do 
-      @order.arr[45] = "[配送日時指定:]\n2012-11-01(木)\n18:00〜20:00"
+      @order.arr[45] = "[配送日時指定:]\n2012-11-01(木)\n18：00〜20：00"
       @order.wish_date.should == Date.new(2012, 11, 1)
     end
 
@@ -104,7 +104,7 @@ describe Order::Rakuten do
     end
 
     it "should return nil when including a wish time." do 
-      @order.arr[45] = "[配送日時指定:]\n18:00〜20:00"
+      @order.arr[45] = "[配送日時指定:]\n18：00〜20：00"
       @order.wish_date.should == nil
     end
 
@@ -116,7 +116,7 @@ describe Order::Rakuten do
 
   describe "#wish_time" do
     it "should be String like 18:00-20:00 when including a wish date and time." do 
-      @order.arr[45] = "[配送日時指定:]\n2012-11-01(木)\n18:00〜20:00"
+      @order.arr[45] = "[配送日時指定:]\n2012-11-01(木)\n18：00〜20：00"
       @order.wish_time.should == "18:00-20:00"
     end
 
@@ -126,8 +126,18 @@ describe Order::Rakuten do
     end
 
     it "should be String like 18:00-20:00 when including a wish time." do 
-      @order.arr[45] = "[配送日時指定:]\n18:00〜20:00"
+      @order.arr[45] = "[配送日時指定:]\n18：00〜20：00"
       @order.wish_time.should == "18:00-20:00"
+    end
+
+    it "should be String like 午前 when including a wish time in am." do 
+      @order.arr[45] = "[配送日時指定:]\n午前"
+      @order.wish_time.should == "午前"
+    end
+
+    it "should be String like 最終便(19：00以降) when including a wish time as latest time." do 
+      @order.arr[45] = "[配送日時指定:]\n最終便(19：00以降)"
+      @order.wish_time.should == "最終便(19：00以降)"
     end
 
     it "should be nil when not including a wish date or time." do 
@@ -137,21 +147,21 @@ describe Order::Rakuten do
   end
 
   describe "#demand" do
-    it "should be string when something written." do 
-      @order.arr[45] = "[配送日時指定:]\n2012-11-01(木)\n18:00〜20:00\n領収書希望"
+    it "should be string if something written." do 
+      @order.arr[45] = "[配送日時指定:]\n2012-11-01(木)\n18：00〜20：00\n領収書希望"
       @order.demand.should == "領収書希望"
     end
 
-    it "should be nil when nothing written." do 
-      @order.arr[45] = "[配送日時指定:]\n2012-11-01(木)\n18:00〜20:00\n"
+    it "should be blank if nothing written." do 
+      @order.arr[45] = "[配送日時指定:]\n2012-11-01(木)\n18：00〜20：00\n"
       @order.demand.should == ""
     end
   end
 
   describe "#memo" do
     it "should be memo when something written." do
-      @order.arr[63] = "不正"
-      @order.memo.should == "不正"
+      @order.arr[63] = "ピンク注文"
+      @order.memo.should == "ピンク注文"
     end
 
     it "should be nil when nothing written." do

@@ -2,9 +2,7 @@
 require 'spec_helper'
 
 describe "Filter: set_status_filter" do
-  before do
-    @order = Order::Rakuten.new([])
-  end
+  before { @order = Order::Rakuten.new([]) }
 
   describe "when payment method is not credit-card  or COD." do
     it "should set nothing as status." do
@@ -16,9 +14,7 @@ describe "Filter: set_status_filter" do
 
   [:card, :cod].each do |method|
     describe "when payment method is #{method}" do
-      before do
-        @order.stub(:payment_method).and_return(method)
-      end
+      before { @order.stub(:payment_method).and_return(method) }
 
       describe "and nothing written in alert, memo in Rakuten, and comment." do
         it "should be 出荷準備OK." do
