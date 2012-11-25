@@ -29,6 +29,10 @@ Stores.each do |store|
       orderlist.save_as(writepath)
     end
 
+    writepath = "#{ExportDir}/log/#{orderlist.log_file_name}"
+    FileUtils.mkdir_p(File.dirname(writepath), :mode => 0777) unless File.exist?(File.dirname(writepath))
+    orderlist.save_log_as(writepath)
+
 #    puts "  Deleting ...   #{loadpath}"
     File.unlink(loadpath)
   end

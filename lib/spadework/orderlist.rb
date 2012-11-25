@@ -1,5 +1,7 @@
 # coding: utf-8
 require 'csv'
+require 'date'
+require 'fileutils'
 
 class OrderList < Array
   OptionalHeader = [
@@ -39,5 +41,21 @@ class OrderList < Array
       writer << self.header
       self.orders.each{ |order| writer << order.to_a }
     end
+  end
+
+  def log_file_name
+    process_rate = @orders.select{|row| row.status == "出荷準備OK" }.size / @orders.size
+    timestamp = Time.now.strftime("%y%m%d_%H%M")
+    "#{timestamp}_auto_processed_#{process_rate}_percent_#{File.basename(@path)}"
+  end
+
+  def save_log_as(fname)
+    FileUtils.touch(fname)
+=begin
+    CSV.open(fname, "w:windows-31j") do |writer|
+      writer << self.header
+      self.orders.each{ |order| writer << order.to_log }
+    end
+=end
   end
 end
