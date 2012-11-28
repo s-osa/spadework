@@ -54,7 +54,8 @@ class Order::Base < Array
   end
 
   def island? ; @@islands_zip.include? self.zipcode ; end
-  def ship_days ; ShipDaysTo[self.pref] ; end
+
+  def ship_days ; ShipDaysTo[self.pref] || 1 ; end
 
   def size
     return :huge    if self.title =~ /\[引越\]/
@@ -94,6 +95,8 @@ class Order::Base < Array
 #### Filters ####
 
   def set_schedule_filter
+    puts self.shippable_date
+    puts self.ship_days
     if ! self.wish_date
       @shipping_date = self.shippable_date.strftime("%Y/%m/%d")
       @delivery_date = (self.shippable_date + self.ship_days).strftime("%Y/%m/%d")
@@ -128,8 +131,9 @@ class Order::Base < Array
   end
 
   def set_status_filter
-    return if self.payment_method != :card && self.payment_method != :cod
-    if (self.domestic_notes + self.memo + self.demand).empty?
+    if Order::Amazon === self
+    elsif not [:card, :cod].include? self.payment_method
+    elsif (self.domestic_notes + self.memo + self.demand).empty?
       @status = "出荷準備OK"
     else
       @status = "確認待"

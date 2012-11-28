@@ -22,13 +22,13 @@ class OrderList < Array
   def initialize(path)
     @path = path
     if @path =~ /\d{10,10}.txt/
-#      @type = Order::Amazon
+      @type = Order::Amazon
     elsif @path =~ /default_all_orders/
 #      @time = Order::Yahoo
     elsif @path =~ /[\w \(\)]+.csv/
       @type = Order::Rakuten
     end
-    reader = CSV.open(@path, "r:windows-31j")
+    reader = CSV.open(@path, "r:windows-31j", col_sep: @type == Order::Amazon ? "\t" : nil)
     @header = reader.shift.map{ |col| col.to_s.encode("utf-8") } + OptionalHeader
     @orders = reader.map{ |row| @type.new(row.map{|col| col.to_s.encode("utf-8") }) }
   end
@@ -37,7 +37,7 @@ class OrderList < Array
   def size ; self.orders.size + 1 ; end
 
   def save_as(fname)
-    CSV.open(fname, "w:windows-31j") do |writer|
+    CSV.open(fname, "w:windows-31j", col_sep: @type == Order::Amazon ? "\t" : nil) do |writer|
       writer << self.header
       self.orders.each{ |order| writer << order.to_a }
     end
