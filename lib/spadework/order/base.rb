@@ -69,30 +69,23 @@ class Order::Base < Array
   end
 
   def shippable_date
-    if self.arrival_date
-      self.arrival_date
-    elsif self.order_datetime < DateTime.new(Time.now.year, Time.now.month, Time.now.day, 13, 30)
-      Date.today
-    elsif self.order_datetime > DateTime.new(Time.now.year, Time.now.month, Time.now.day, 15, 30)
-      Date.today + 1
-    else
-      Date4.parse(self.order_datetime.to_s).national_holiday? ? Date.today + 1 : Date.today
-    end
+    return self.arrival_date if self.arrival_date
+    return Date.today        if self.order_datetime < DateTime.new(Time.now.year, Time.now.month, Time.now.day, 13, 30)
+    return Date.today + 1    if self.order_datetime > DateTime.new(Time.now.year, Time.now.month, Time.now.day, 15, 30)
+    Date4.parse(self.order_datetime.to_s).national_holiday? ? Date.today + 1 : Date.today
   end
 
   def payment_method(str)
-    if str =~ /カード/ || str =~ /Card/ || str.empty?
-      :card
-    elsif str =~ /代金引換/ || str =~ /COD/
-      :cod
-    else
-      :other
+    case str
+    when /カード/, /Card/, /^$/  then :card
+    when /代金引換/, /COD/       then :cod
+    else :other
     end
   end
 
   def memo ; "" ; end
 
-#### Filters ####
+#### Filters ############################################################################
 
   def set_schedule_filter
     if @domestic_notes =~ /\[複数\]/
