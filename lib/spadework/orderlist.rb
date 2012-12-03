@@ -55,7 +55,7 @@ class OrderList < Array
   def log_file_name
     process_rate = @orders.count{|row| row.status == "出荷準備OK" } * 100.0 / @orders.size
     timestamp = Time.now.strftime("%y%m%d_%H%M")
-    "#{timestamp}_auto_processed_#{process_rate}_percent_#{File.basename(@path)}"
+    "#{timestamp}_auto_processed_#{process_rate.round(1)}_percent_#{File.basename(@path)}"
   end
 
   def save_log_as(fname)

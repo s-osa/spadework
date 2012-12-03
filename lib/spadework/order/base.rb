@@ -10,8 +10,8 @@ class Order::Base < Array
     "新潟県" => 1, "富山県" => 1, "石川県" => 1, "福井県" => 1, "山梨県" => 1, "長野県" => 1,
     "岐阜県" => 1, "静岡県" => 1, "愛知県" => 1, "三重県" => 1,
     "滋賀県" => 1, "京都府" => 1, "大阪府" => 1, "兵庫県" => 1, "奈良県" => 1, "和歌山県" => 1,
-    "鳥取県" => 2, "島根県" => 2, "岡山県" => 2, "広島県" => 2, "山口県" => 2,
-    "徳島県" => 2, "香川県" => 2, "愛媛県" => 2, "高知県" => 2,
+    "鳥取県" => 1, "島根県" => 1, "岡山県" => 1, "広島県" => 1, "山口県" => 1,
+    "徳島県" => 1, "香川県" => 1, "愛媛県" => 1, "高知県" => 1,
     "福岡県" => 2, "佐賀県" => 2, "長崎県" => 2, "熊本県" => 2, "大分県" => 2, "宮崎県" => 2, "鹿児島県" => 2,
     "沖縄県" => 2
   }
@@ -116,18 +116,15 @@ class Order::Base < Array
       end
     elsif self.size == :xlarge
       @carrier = "ヤマト便" ; alert "[時間指定不可]" if self.wish_time
+    elsif self.wish_date >= self.shippable_date + 2
+      @carrier = "佐川急便"
     elsif %w(鳥取県 島根県 岡山県 広島県 山口県 香川県 徳島県 愛媛県 高知県 青森県 和歌山県).include? self.pref
       case self.size
       when :xlarge,:large then @carrier = "ヤマト便"   ; alert "[時間指定不可]" if self.wish_time
       when :regular       then @carrier = "ヤマト運輸" ; alert "[時間指定可？]" if Before16.include? self.wish_time
       end
-    elsif self.wish_date.nil? || self.wish_date >= self.shippable_date + 2
-      @carrier = "佐川急便"
     else
-      case self.size
-      when :xlarge,:large then @carrier = "ヤマト便"   ; alert "[時間指定不可]" if self.wish_time
-      when :regular       then @carrier = "ヤマト運輸"
-      end
+      @carrier = "佐川急便"
     end
   end
 
