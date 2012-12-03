@@ -15,6 +15,7 @@ class Order::Base < Array
     "福岡県" => 2, "佐賀県" => 2, "長崎県" => 2, "熊本県" => 2, "大分県" => 2, "宮崎県" => 2, "鹿児島県" => 2,
     "沖縄県" => 2
   }
+  Before16 = ["午前", "12:00-14:00", "14:00-16:00"]
 
   @@islands_zip = []
   File.open("lib/spadework/data/islands.txt"){ |file| file.each_line{|line| @@islands_zip << line.strip} }
@@ -54,7 +55,6 @@ class Order::Base < Array
   end
 
   def island? ; @@islands_zip.include? self.zipcode ; end
-
   def ship_days ; ShipDaysTo[self.pref] || 1 ; end
 
   def size
@@ -95,9 +95,8 @@ class Order::Base < Array
 #### Filters ####
 
   def set_schedule_filter
-    puts self.shippable_date
-    puts self.ship_days
-    if ! self.wish_date
+    if @domestic_notes =~ /\[複数\]/
+    elsif not self.wish_date
       @shipping_date = self.shippable_date.strftime("%Y/%m/%d")
       @delivery_date = (self.shippable_date + self.ship_days).strftime("%Y/%m/%d")
     elsif self.wish_date >= self.shippable_date + 3
@@ -114,19 +113,28 @@ class Order::Base < Array
   end
 
   def set_carrier_filter
-    if  self.size == :huge
+    if @domestic_notes =~ /\[複数\]/
+    elsif  self.size == :huge
       @carrier = "ヤマトHC" ; alert "[引越]"
     elsif self.island?
-      @carrier = (self.size == :xlarge) ? "ヤマト便" : "ヤマト運輸"
-      alert self.size == :xlarge ? "[離島大型]" : "[離島]"
+      case self.size
+      when :xlarge,:large then @carrier = "ヤマト便"   ; alert "[離島大型]"
+      when :regular       then @carrier = "ヤマト運輸" ; alert "[離島]"
+      end
     elsif self.size == :xlarge
-      self.set_yamato
+      @carrier = "ヤマト便" ; alert "[時間指定不可]" if self.wish_time
     elsif %w(鳥取県 島根県 岡山県 広島県 山口県 香川県 徳島県 愛媛県 高知県 青森県 和歌山県).include? self.pref
-      self.set_yamato
+      case self.size
+      when :xlarge,:large then @carrier = "ヤマト便"   ; alert "[時間指定不可]" if self.wish_time
+      when :regular       then @carrier = "ヤマト運輸" ; alert "[時間指定可？]" if Before16.include? self.wish_time
+      end
     elsif self.wish_date.nil? || self.wish_date >= self.shippable_date + 2
       @carrier = "佐川急便"
     else
-      self.set_yamato
+      case self.size
+      when :xlarge,:large then @carrier = "ヤマト便"   ; alert "[時間指定不可]" if self.wish_time
+      when :regular       then @carrier = "ヤマト運輸"
+      end
     end
   end
 
@@ -143,15 +151,5 @@ class Order::Base < Array
 protected
   def alert(str) ; @domestic_notes << str ; end
   def info(str)  ; @warning << str        ; end
-
-  def set_yamato
-    if self.size == :xlarge || self.size == :large
-      @carrier = "ヤマト便"
-      alert "[時間指定不可]" if self.wish_time
-    elsif self.size == :regular
-      @carrier = "ヤマト運輸"
-      alert "[時間指定可？]" if ["午前", "12:00-14:00", "14:00-16:00"].include? self.wish_time
-    end
-  end
 end
 

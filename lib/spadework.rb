@@ -6,13 +6,11 @@ require 'fileutils'
 
 ExportDir = File.expand_path(File.dirname(__FILE__) + "/../export")
 ImportDir = File.expand_path(File.dirname(__FILE__) + "/../import")
-Stores    = ["maido", "amazon", "plus"]
-# Stores    = ["maido", "amazon", "plus", "yahoo"]
+Stores    = ["maido", "amazon", "plus", "yahoo"]
 
-Stores.each do |store|
-  puts "== #{store} ============================================================"
+def convert(store)
   Dir.glob("#{ImportDir}/#{store}/*").each do |loadpath|
-    puts "  Loading ...   #{loadpath}"
+    return if (1..2).any?{ |num| File.exist?("#{ExportDir}/#{store}#{num}/#{File.basename(loadpath)}") }
 
     orderlist = OrderList.new(loadpath)
     orderlist.orders.each do |order|
@@ -22,19 +20,22 @@ Stores.each do |store|
       order.set_status_filter   # This filter must be put on under all filters!!
     end
 
-    (1..2).each do |num|
-      writepath = "#{ExportDir}/#{store}#{num}/#{File.basename(loadpath)}"
-      puts "  Writing ...   #{writepath}"
-      FileUtils.mkdir_p(File.dirname(writepath), :mode => 0777) unless File.exist?(File.dirname(writepath))
-      orderlist.save_as(writepath)
-    end
-
-    writepath = "#{ExportDir}/log/#{orderlist.log_file_name}"
-    FileUtils.mkdir_p(File.dirname(writepath), :mode => 0777) unless File.exist?(File.dirname(writepath))
-    orderlist.save_log_as(writepath)
+    (1..2).each { |num| orderlist.save_as("#{ExportDir}/#{store}#{num}/#{File.basename(loadpath)}") }
+    orderlist.save_log_as("#{ExportDir}/log/#{orderlist.log_file_name}")
 
     puts "  Deleting ...   #{loadpath}"
     File.unlink(loadpath)
   end
-  puts "  => FINISH!!",""
+end
+
+Stores.each do |store|
+  begin
+    puts "== #{store} ============================================================"
+    convert(store)
+    puts "  => FINISH!",""
+  rescue
+    puts "  => ERROR!!",""
+    puts $!
+    puts $@
+  end
 end

@@ -2,6 +2,7 @@
 class Order::Rakuten < Order::Base
   DateRegexp = /(\d{4})-(\d{2})-(\d{2})\(.\)/
   TimeRegexp = /(\d{1,2})：(\d{2}).(\d{2})：(\d{2})/
+
   def order_datetime ; DateTime.parse(@arr[2] + " " + @arr[3]) ; end
   def title ; @arr[4] ; end
   def zipcode ; @arr[28] + "-" + @arr[29] ; end

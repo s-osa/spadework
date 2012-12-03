@@ -8,6 +8,15 @@ describe "Filter: set_schedule_filter" do
     @order.stub(:ship_days).and_return(2)
   end
 
+  describe "when multi items order in yahoo" do
+    it "should set nothing as shipping_date and derivery_date." do
+      @order.domestic_notes = "[複数]"
+      @order.set_schedule_filter
+      @order.shipping_date.should == ""
+      @order.delivery_date.should == ""
+    end
+  end
+
   describe "when no wish_date" do
     before do
       @order.stub(:wish_date).and_return(nil)

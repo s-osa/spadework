@@ -6,6 +6,14 @@ describe "Filter: set_carrier_filter" do
     @order = Order::Rakuten.new([])
   end
 
+  describe "when multi items order in yahoo" do
+    it "should set nothing as carrier." do
+      @order.domestic_notes = "[複数]"
+      @order.set_carrier_filter
+      @order.carrier.should == ""
+    end
+  end
+
   describe "when size of item is huge" do
     it "should set ヤマトHC as carrier." do
       @order.stub(:size).and_return(:huge)
@@ -28,7 +36,7 @@ describe "Filter: set_carrier_filter" do
     end
 
     it "should set ヤマト運輸 as carrier, 離島 as domestic_notes." do
-      @order.stub(:size).and_return(:large)
+      @order.stub(:size).and_return(:regular)
       @order.set_carrier_filter
       @order.carrier.should == "ヤマト運輸"
       @order.domestic_notes.should =~ /\[離島\]/
@@ -163,7 +171,7 @@ describe "Filter: set_carrier_filter" do
       @order.stub(:wish_time).and_return("12:00-14:00")
       @order.set_carrier_filter
       @order.carrier.should == "ヤマト運輸"
-      @order.domestic_notes.should =~ /\[時間指定可？\]/
+      @order.domestic_notes.should_not =~ /\[時間指定可？\]/
     end
 
     it "should set ヤマト運輸 as carrier if wish_time after 16." do

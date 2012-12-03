@@ -4,4 +4,5 @@ end
 
 require 'spadework/order/base'
 require 'spadework/order/rakuten'
+require 'spadework/order/yahoo'
 require 'spadework/order/amazon'
