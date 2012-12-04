@@ -116,7 +116,7 @@ class Order::Base < Array
       end
     elsif self.size == :xlarge
       @carrier = "ヤマト便" ; alert "[時間指定不可]" if self.wish_time
-    elsif self.wish_date >= self.shippable_date + 2
+    elsif self.wish_date && self.wish_date >= self.shippable_date + 2
       @carrier = "佐川急便"
     elsif %w(鳥取県 島根県 岡山県 広島県 山口県 香川県 徳島県 愛媛県 高知県 青森県 和歌山県).include? self.pref
       case self.size
