@@ -27,6 +27,28 @@ describe OrderList do
     end
   end
 
+  describe "#malltype" do
+    it "should be Order::Amazon when filename is like 1234567890.txt" do
+      @orderlist.loadpath = "/hogehoge/1234567890 (2).txt"
+      @orderlist.type.should == Order::Amazon
+    end
+
+    it "should be Order::Rakuten when filename is like 20121203 (2).csv" do
+      @orderlist.loadpath = "/hogehoge/2012103 (2).csv"
+      @orderlist.type.should == Order::Rakuten
+    end
+
+    it "should be Order::Yahoo when filename is like default_all_orders.csv" do
+      @orderlist.loadpath = "/hogehoge/default_all_orders.csv"
+      @orderlist.type.should == Order::Yahoo
+    end
+
+    it "should be nil when filename is like default_all_items.csv" do
+      @orderlist.loadpath = "/hogehoge/default_all_items.csv"
+      @orderlist.type.should == nil
+    end
+  end
+
   describe "#save_as" do
     it "should be able to save CSV" do
       @orderlist.save_as("spec.csv")

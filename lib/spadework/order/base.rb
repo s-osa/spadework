@@ -15,6 +15,7 @@ class Order::Base < Array
     "福岡県" => 2, "佐賀県" => 2, "長崎県" => 2, "熊本県" => 2, "大分県" => 2, "宮崎県" => 2, "鹿児島県" => 2,
     "沖縄県" => 2
   }
+  DayOfWeek = %w(日 月 火 水 木 金 土)
   Before16 = ["午前", "12:00-14:00", "14:00-16:00"]
 
   @@islands_zip = []
@@ -135,6 +136,21 @@ class Order::Base < Array
       @status = "出荷準備OK"
     else
       @status = "確認待"
+    end
+  end
+
+  def tel_before_delivery_filter
+    @message << "※お届け前要電話連絡" if self.size == :xlarge || self.size == :large
+  end
+
+  def no_warranty_stamp_filter
+    @direction << "【保証書無印】" if self.destination =~ /電|[^ガ][^ー]デン|でん/
+  end
+
+  def wish_datetime_format_filter
+    if self.wish_date || self.wish_time
+      date = self.wish_date ? "#{self.wish_date.strftime("%Y-%m-%d")}(#{DayOfWeek[self.wish_date.wday]})" : nil
+      @notes << "[配送日時指定:] #{date} #{self.wish_time}\n"
     end
   end
 

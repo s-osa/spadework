@@ -7,6 +7,7 @@ class Order::Rakuten < Order::Base
   def title ; @arr[4] ; end
   def zipcode ; @arr[28] + "-" + @arr[29] ; end
   def pref ; @arr[30] ; end
+  def destination ; @arr[30]+@arr[31]+@arr[32]+@arr[24]+@arr[25] ; end
   def payment_method ; super @arr[37] ; end
   def wish_date ; @arr[45] =~ DateRegexp ? Date.new($1.to_i, $2.to_i, $3.to_i) : nil ; end
 

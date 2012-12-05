@@ -85,6 +85,17 @@ describe Order::Rakuten do
     end
   end
 
+  describe "#destination" do
+    it "should be address and name." do
+      @order.arr[24] = "鈴木"
+      @order.arr[25] = "一郎"
+      @order.arr[30] = "東京都"
+      @order.arr[31] = "大田区"
+      @order.arr[32] = "蒲田1000-100-10"
+      @order.destination.should == "東京都大田区蒲田1000-100-10鈴木一郎"
+    end
+  end
+
   describe "#payment_method" do
     it "should be card" do 
       @order.arr[37] = "クレジットカード"

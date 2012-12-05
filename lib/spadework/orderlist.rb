@@ -4,44 +4,44 @@ require 'date'
 require 'fileutils'
 
 class OrderList < Array
-  OptionalHeader = [
-    "ステータス",
-    "指定出荷日",
-    "指定配送日",
-    "指定配送方法",
-    "指定配送時間",
-    "備考",
-    "社内備考",
-    "倉庫指示",
-    "連絡",
-    "警告",
-  ]
+  OptionalHeader = %w(ステータス 指定出荷日 指定配送日 指定配送方法 指定配送時間 備考 社内備考 倉庫指示 連絡 警告)
 
-  attr_accessor :path, :type, :header, :orders
+  attr_accessor :timestamp, :loadpath, :header, :orders
 
-  def initialize(filepath)
-    puts "  Loading ...   #{filepath}"
-    @path = filepath
-    case @path
-    when /\d{10,10}([\s\(\)\d])*\.txt/
-      @type = Order::Amazon
-    when /default_all_orders/
-      @type = Order::Yahoo
-      path = File.dirname(@path) + "/default_all_items.csv"
+  def initialize(loadpath)
+    puts "  Loading ...   #{loadpath}"
+    @timestamp = Time.now
+    @loadpath = loadpath
+    if self.type == Order::Yahoo
+      path = File.dirname(@loadpath) + "/default_all_items.csv"
       raise RuntimeError, "could not find default_all_items.csv" unless File.exist?(path)
       reader = CSV.open(path, "r:windows-31j")
       reader.each{ |row| Order::Yahoo.items << row.map{|col| col.to_s.encode("utf-8") } }
-      File.rename(path, File.expand_path(File.dirname(path) + "/../../export/yahoo1/default_all_items.csv"))
-    when /[\w \(\)]+\.csv/
-      @type = Order::Rakuten
+      File.rename(path, File.expand_path(File.dirname(path) + "/../../export/yahoo1/Yahoo_#{@timestamp.strftime("%Y%m%d_%H%M%S")}.csv"))
     end
-    reader = CSV.open(@path, "r:windows-31j", col_sep: @type == Order::Amazon ? "\t" : ",")
+    reader = CSV.open(@loadpath, "r:windows-31j", col_sep: self.type == Order::Amazon ? "\t" : ",")
     @header = reader.shift.map{ |col| col.to_s.encode("utf-8") } + OptionalHeader
-    @orders = reader.map{ |row| @type.new(row.map{|col| col.to_s.encode("utf-8") }) }
+    @orders = reader.map{ |row| self.type.new(row.map{|col| col.to_s.encode("utf-8") }) }
   end
 
   def inspect ; [@path, @type, @header, @orders] ; end
   def size ; self.orders.size + 1 ; end
+
+  def type
+    case @loadpath
+    when /\d{10,10}([\s\(\)\d])*\.txt/ then Order::Amazon
+    when /default_all_orders/          then Order::Yahoo
+    when /default_all_items/           then nil
+    when /[\w\s\(\)]+\.csv/            then Order::Rakuten
+    end
+  end
+
+  def load_file_name ; File.basename(@loadpath) ; end
+
+  def save_file_name
+    return "Yahoo_#{@timestamp.strftime("%Y%m%d_%H%M%S")}h.csv" if self.type == Order::Yahoo
+    self.load_file_name
+  end
 
   def save_as(fname)
     puts "  Writing ...   #{fname}"
@@ -53,9 +53,9 @@ class OrderList < Array
   end
 
   def log_file_name
-    process_rate = @orders.count{|row| row.status == "出荷準備OK" } * 100.0 / @orders.size
+    process_rate = @orders.count{|row| row.status == "出荷準備OK" } * 100 / @orders.size
     timestamp = Time.now.strftime("%y%m%d_%H%M")
-    "#{timestamp}_auto_processed_#{process_rate.round(1)}_percent_#{File.basename(@path)}"
+    "#{timestamp}_auto_processed_#{process_rate}%_of_#{@orders.size}orders_in_#{File.basename(@loadpath)}"
   end
 
   def save_log_as(fname)

@@ -6,6 +6,7 @@ class Order::Amazon < Order::Base
   def title ; @arr[8] ; end
   def zipcode ; @arr[22] ; end
   def pref ; @arr[21] ; end
+  def destination ; @arr[21]+@arr[20]+@arr[17]+@arr[18]+@arr[19]+@arr[16] ; end
   def payment_method ; super @arr[40] ; end
   def wish_date ; nil ; end
   def wish_time ; nil ; end
