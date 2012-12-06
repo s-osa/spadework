@@ -154,6 +154,10 @@ class Order::Base < Array
     end
   end
 
+  def recycle_filter
+    @direction << "【リサイクル券】" if self.pcode.any?{|code| code =~ /RECYCLE/i }
+  end
+
 protected
   def alert(str) ; @domestic_notes << str ; end
   def info(str)  ; @warning << str        ; end

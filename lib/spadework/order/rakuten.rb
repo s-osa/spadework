@@ -5,6 +5,7 @@ class Order::Rakuten < Order::Base
 
   def order_datetime ; DateTime.parse(@arr[2] + " " + @arr[3]) ; end
   def title ; @arr[4] ; end
+  def pcode ; [@arr[5]] ; end
   def zipcode ; @arr[28] + "-" + @arr[29] ; end
   def pref ; @arr[30] ; end
   def destination ; @arr[30]+@arr[31]+@arr[32]+@arr[24]+@arr[25] ; end

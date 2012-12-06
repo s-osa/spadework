@@ -72,6 +72,14 @@ describe Order::Yahoo do
     end
   end
 
+  describe "#pcode" do
+    it "should return product code of item." do
+      Order::Yahoo.items = [["123","1","1","ABC-DE01"], ["123","2","3","ABC-DE02"]]
+      @order.arr[0] = "123"
+      @order.pcode.should == ["ABC-DE01", "ABC-DE02"]
+    end
+  end
+
   describe "#zipcode" do
     it "should be zipcode like 123-4567" do
       @order.arr[13] = "012-0345"

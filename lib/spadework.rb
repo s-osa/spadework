@@ -21,6 +21,7 @@ def convert(store)
       order.tel_before_delivery_filter
       order.no_warranty_stamp_filter
       order.wish_datetime_format_filter if order.class == Order::Yahoo
+      order.recycle_filter
       order.set_status_filter   # This filter must be put under all filters!!
     end
 

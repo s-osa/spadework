@@ -71,6 +71,13 @@ describe Order::Rakuten do
     end
   end
 
+  describe "#pcode" do
+    it "should return product code of item." do
+      @order.arr[5] = "LC-32H7"
+      @order.pcode.should == ["LC-32H7"]
+    end
+  end
+
   describe "#zipcode" do
     it "should be zipcode like 123-4567" do
       @order.arr[28], @order.arr[29] = "012", "0345"

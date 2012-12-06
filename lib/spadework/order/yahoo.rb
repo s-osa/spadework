@@ -6,7 +6,7 @@ class Order::Yahoo < Order::Base
 
   @@items ||= []
   def self.items  ; @@items ; end
-  def self.items= ; @@items ; end
+  def self.items=(arr) ; @@items = arr ; end
 
   def initialize(arr)
     super(arr)
@@ -15,6 +15,7 @@ class Order::Yahoo < Order::Base
 
   def order_datetime ; DateTime.parse(@arr[5]) ; end
   def title ; @domestic_notes =~ /複数/ ? "" : @@items.find{|row| row[0] == @arr[0]}[5] ; end
+  def pcode ; @@items.select{|item| item[0] == @arr[0]}.map{|item| item[3] } ; end
   def zipcode ; @arr[13] ; end
   def pref ; @arr[11] ; end
   def destination ; @arr[11]+@arr[10]+@arr[8]+@arr[9]+@arr[7] ; end
