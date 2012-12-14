@@ -131,4 +131,12 @@ describe Order::Base do
       @order.payment_method("NT_CVS_Seven").should == :other
     end
   end
+
+  describe "#ship_destination" do
+    it "should be address and name" do
+      @order.stub(:ship_address).and_return("東京都大田区蒲田4-32-2")
+      @order.stub(:ship_name).and_return("鈴木一郎")
+      @order.ship_destination.should == "東京都大田区蒲田4-32-2 鈴木一郎"
+    end
+  end
 end

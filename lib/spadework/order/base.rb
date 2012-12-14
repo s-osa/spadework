@@ -86,6 +86,8 @@ class Order::Base < Array
 
   def memo ; "" ; end
 
+  def ship_destination ; "#{self.ship_address} #{self.ship_name}" ; end
+
 #### Filters ############################################################################
 
   def set_schedule_filter
@@ -144,7 +146,7 @@ class Order::Base < Array
   end
 
   def no_warranty_stamp_filter
-    @direction << "【保証書無印】" if self.destination =~ /電|[^ガ][^ー]デン|でん/
+    @direction << "【保証書無印】" if self.ship_destination =~ /電|でん|(?<!ガー)デン(?!ス)/
   end
 
   def wish_datetime_format_filter
@@ -156,6 +158,11 @@ class Order::Base < Array
 
   def recycle_filter
     @direction << "【リサイクル券】" if self.pcode.any?{|code| code =~ /RECYCLE/i }
+  end
+
+  def house_number_filter
+    self.ship_address =~ /([^市区町村]+)\z/
+    alert "[番地無し]" unless $1 =~ /[\d０１２３４５６７８９一二三四五六七八九十百]/
   end
 
 protected

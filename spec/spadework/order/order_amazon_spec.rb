@@ -92,15 +92,21 @@ describe Order::Amazon do
     end
   end
 
-  describe "#destination" do
-    it "should be address and name." do
+  describe "#ship_name" do
+    it "should be name." do
       @order.arr[16] = "鈴木一郎"
+      @order.ship_name.should == "鈴木一郎"
+    end
+  end
+
+  describe "#ship_address" do
+    it "should be address." do
       @order.arr[17] = "大田区蒲田"
       @order.arr[18] = "1000-100-10"
       @order.arr[19] = ""
       @order.arr[20] = ""
       @order.arr[21] = "東京都"
-      @order.destination.should == "東京都大田区蒲田1000-100-10鈴木一郎"
+      @order.ship_address.should == "東京都大田区蒲田1000-100-10"
     end
   end
 
