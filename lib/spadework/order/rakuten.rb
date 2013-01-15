@@ -1,7 +1,7 @@
 # coding: utf-8
 class Order::Rakuten < Order::Base
   DateRegexp = /(\d{4})-(\d{2})-(\d{2})\(.\)/
-  TimeRegexp = /(\d{1,2})：(\d{2}).(\d{2})：(\d{2})/
+  TimeRegexp = /(\d{1,2})[:：](\d{2}).(\d{2})[:：](\d{2})/
 
   def order_datetime ; DateTime.parse(@arr[2] + " " + @arr[3]) ; end
   def title ; @arr[4] ; end
@@ -26,10 +26,13 @@ class Order::Rakuten < Order::Base
   end
 
   def demand
+=begin
     str = @arr[45]
     str = str.gsub(/\[[^\]]+:\]/,"").gsub(DateRegexp,"").gsub(TimeRegexp,"")
     str = str.gsub("午前","").gsub("最終便(19：00以降)","")
     str = str.gsub(/\n+/,"")
+=end
+    @arr[45].gsub(/\[[^\]]+:\]/,"").gsub(DateRegexp,"").gsub(TimeRegexp,"").gsub(/\s/,"").gsub(/\n+/,"")
   end
 
   def memo ; @arr[63] ? @arr[63] : "" ; end
