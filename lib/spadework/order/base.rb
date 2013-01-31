@@ -16,7 +16,7 @@ class Order::Base < Array
     "沖縄県" => 2
   }
   DayOfWeek = %w(日 月 火 水 木 金 土)
-  Before16 = ["午前", "12:00-14:00", "14:00-16:00"]
+  Before16 = ["9:00-12:00", "12:00-14:00", "14:00-16:00"]
 
   @@islands_zip = []
   File.open("lib/spadework/data/islands.txt"){ |file| file.each_line{|line| @@islands_zip << line.strip} }
